@@ -29,12 +29,15 @@ class Opcode(IntEnum):
     MOD = 0x26
     CMP = 0x27
     CMPI = 0x28
+    NEG = 0x29
 
     JMP = 0x30
     BEQ = 0x31
     BNE = 0x32
     BLT = 0x33
     BGT = 0x34
+    BLE = 0x35
+    BGE = 0x36
 
     HLT = 0xFF
 
@@ -59,7 +62,7 @@ class Instruction:
         return Instruction(opcode, operand)
 
     def __str__(self) -> str:
-        if self.opcode == Opcode.HLT:
+        if self.opcode in {Opcode.NEG, Opcode.HLT}:
             return self.opcode.name.lower()
         return f"{self.opcode.name.lower()} {self.operand}"
 
