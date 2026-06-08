@@ -39,7 +39,7 @@
 
 ## Язык программирования
 ### Синтаксис (BNF)
-```
+```bnf
 <program>       ::= { <statement> "\n" }
 <statement>     ::= <declaration>
                   | <assignment>
@@ -176,7 +176,84 @@ opcode       operand
 todo
 
 ## Транслятор
-todo
+
+`translator.py` -> `parse` -> `validate` -> `emit` -> `resolve_code` -> `isa.write_binary`.
+
+Транслятор читает исходный файл на языке, строит простое AST-представление операторов, генерирует команды аккумуляторной ISA и записывает единый бинарный образ памяти
+
+### Интерфейс командной строки
+
+```bash
+python translator.py <source_file> <target_bin>
+```
+
+- Входные данные:
+  1. `<source_file>` - текстовый файл с исходной программой, UTF-8
+  2. `<target_bin>` - выходной бинарный файл с образом памяти
+- Выходные данные:
+  - `<target_bin>` - бинарный образ памяти. Каждое машинное слово записывается как 32-битное big-endian значение
+  - `<target_bin>.lst` - отладочный листинг вида `<address> - <HEXCODE> - <mnemonic>`
+  - `<target_bin>.ast` - AST-представление исходной программы
+- В `stdout` печатается статистика трансляции: количество строк исходного кода, количество инструкций, количество слов данных и имена созданных файлов
+
+### Формат бинарного файла
+
+Бинарный файл содержит заголовок и затем линейный образ памяти:
+
+```text
+word 0    entry_point = CODE_BASE
+word 1    memory_size
+word 2..  memory image
+```
+
+`memory image` размещается так:
+
+```text
+memory[0]                 IN_PORT
+memory[1]                 OUT_PORT
+memory[CODE_BASE]         первая инструкция программы
+...
+memory[CODE_BASE + N]     начало статической области данных
+```
+
+`CODE_BASE = 0x0002`, `IN_PORT = 0x0000`, `OUT_PORT = 0x0001`
+
+### Pipeline
+
+```text
+source_file
+  -> parse(source)
+       -> список Statement(kind, line, name, expr, condition, ...)
+       -> таблица symbols: имя -> смещение в data
+       -> таблица types: имя -> тип
+  -> validate_expr / validate_condition
+       -> проверка выражений по BNF языка
+  -> emit_statement
+       -> список _CodeItem(opcode, operand, operand_kind)
+       -> статическая область data
+  -> patch
+       -> подстановка адресов переходов для if/else/end и while/end
+  -> resolve_code
+       -> перевод code_ref и data_ref в абсолютные адреса памяти
+  -> isa.write_binary
+       -> запись <target_bin>
+  -> isa.to_listing + ast_text
+       -> запись <target_bin>.lst и <target_bin>.ast
+```
+
+Парсер работает построчно, пустые строки пропускаются, комментарии не поддерживаются, поэтому попытка их написать вызовет условное `БегВремяИсключение`
+
+### Нюанс с адресами в инструкциях
+
+Во время генерации код ещё не знает абсолютный адрес секции данных, потому что длина кода может изменяться. Поэтому инструкции сначала сохраняются как `_CodeItem` с типом операнда:
+- `raw` - операнд уже готов и не меняется, например: immediate-число, `IN_PORT`, `OUT_PORT`;
+- `data` - операнд является смещением внутри секции данных;
+- `code` - операнд является позицией инструкции внутри секции кода.
+
+На этапе `resolve_code`:
+- к `data_ref` прибавляется `data_base = CODE_BASE + len(code)`;
+- к `code_ref` прибавляется `CODE_BASE`;
+- `raw` остаётся без изменений.
 
 ## Модель процессора
 ### DataPath

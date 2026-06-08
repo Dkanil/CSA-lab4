@@ -64,7 +64,7 @@ class Instruction:
     def __str__(self) -> str:
         if self.opcode in {Opcode.NEG, Opcode.HLT}:
             return self.opcode.name.lower()
-        return f"{self.opcode.name.lower()} {self.operand}"
+        return f"{self.opcode.name.lower()} {self.operand}" # todo мнемонику подробнее надо
 
 
 def to_signed32(value: int) -> int:
