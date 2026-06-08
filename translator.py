@@ -46,6 +46,7 @@ class Translator:
         self.blocks: list[tuple] = []
         self.ast: list[Statement] = []
         self.temp_index = 0
+        self.free_expr_temps: list[int] = []
 
     def compile(self, source: str) -> tuple[list[Instruction], list[int], str]:
         self.ast = self.parse(source)
@@ -242,13 +243,21 @@ class Translator:
             instructions.append(Instruction(item.opcode, operand))
         return instructions
 
-    def alloc_temp(self, name: str) -> int: # fixme чето много жрет мне кажется памяти
+    def alloc_temp(self, name: str) -> int:
         actual = f"__{name}_{self.temp_index}"
         self.temp_index += 1
         self.symbols[actual] = len(self.data)
         self.types[actual] = "num"
         self.data.append(0)
         return self.symbols[actual]
+
+    def alloc_expr_temp(self) -> int:
+        if self.free_expr_temps:
+            return self.free_expr_temps.pop()
+        return self.alloc_temp("expr")
+
+    def free_expr_temp(self, cell: int) -> None:
+        self.free_expr_temps.append(cell)
 
     def emit_statement(self, statement: Statement) -> None:
         if statement.kind in {"var", "pstr"}:
@@ -313,10 +322,10 @@ class Translator:
                 self.emit(opcode, self.raw(right_imm))
                 return
             self.emit_expr_node(node.left)
-            left = self.alloc_temp("left")
+            left = self.alloc_expr_temp()
             self.emit(Opcode.ST, self.data_ref(left))
             self.emit_expr_node(node.right)
-            right = self.alloc_temp("right")
+            right = self.alloc_expr_temp()
             self.emit(Opcode.ST, self.data_ref(right))
             self.emit(Opcode.LD, self.data_ref(left))
             opcodes = {
@@ -326,7 +335,9 @@ class Translator:
                 ast.FloorDiv: Opcode.DIV,
                 ast.Mod: Opcode.MOD,
             }
-            self.emit(opcodes[type(node.op)], self.data_ref(right)) # todo мб обернуть в проверку типа node.op
+            self.emit(opcodes[type(node.op)], self.data_ref(right))
+            self.free_expr_temp(right)
+            self.free_expr_temp(left)
             return
         raise AssertionError(f"unsupported expression node: {ast.dump(node)}")
 
@@ -341,13 +352,15 @@ class Translator:
         if right_imm is not None:
             self.emit(Opcode.CMPI, self.raw(right_imm))
         else:
-            left_cell = self.alloc_temp("cmp_left")
+            left_cell = self.alloc_expr_temp()
             self.emit(Opcode.ST, self.data_ref(left_cell))
             self.emit_expr(right)
-            right_cell = self.alloc_temp("cmp_right")
+            right_cell = self.alloc_expr_temp()
             self.emit(Opcode.ST, self.data_ref(right_cell))
             self.emit(Opcode.LD, self.data_ref(left_cell))
             self.emit(Opcode.CMP, self.data_ref(right_cell))
+            self.free_expr_temp(right_cell)
+            self.free_expr_temp(left_cell)
 
         if op == "==":
             return self.emit(Opcode.BNE, self.code_ref(0))
@@ -379,7 +392,7 @@ class Translator:
         self.emit(Opcode.LD, self.raw(IN_PORT))
         self.emit(Opcode.ST, self.data_ref(left))
         self.emit(Opcode.LDI, self.raw(0))
-        self.emit(Opcode.ST, self.data_ref(length)) # todo код дубль пофиксить мб если время будет
+        self.emit(Opcode.ST, self.data_ref(length))
 
         loop = len(self.code)
         self.emit(Opcode.LD, self.data_ref(left))
