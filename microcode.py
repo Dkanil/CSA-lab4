@@ -50,8 +50,8 @@ class CondCode(IntEnum):
     NE = 4  # z = 0 -> jmp_addr, иначе next
     LT = 5  # n = 1 -> jmp_addr, иначе next
     GT = 6  # n = 0 and z = 0 -> jmp_addr, иначе next
-    LE = 7  # n = 1 and z = 1 -> jmp_addr, иначе next
-    GE = 8  # n = 0 and z = 1 -> jmp_addr, иначе next
+    LE = 7  # n = 1 or z = 1 -> jmp_addr, иначе next
+    GE = 8  # n = 0 -> jmp_addr, иначе next
 
 
 @dataclass(frozen=True)
