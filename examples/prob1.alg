@@ -1,5 +1,4 @@
 var num max_pal
-var num limit
 var num i
 var num j
 var num prod
@@ -8,8 +7,7 @@ var num rev
 var num rem
 
 set max_pal = 0
-input(limit)
-set i = limit - 1
+set i = 999
 
 while i >= 100:
     set j = i

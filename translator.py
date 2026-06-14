@@ -8,6 +8,7 @@ from isa import CODE_BASE, IN_PORT, OUT_PORT, Instruction, Opcode, to_listing, w
 
 IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
 INTEGER_RE = re.compile(r"\d+\Z")
+ARRAY_DECL_RE = re.compile(r"var\s+num\s+([A-Za-z_][A-Za-z0-9_]*)\[(\d+)]\Z")
 COND_RE = re.compile(r"(.+?)\s*(==|!=|<=|>=|<|>)\s*(.+)\Z")
 DEFAULT_PSTR_CAPACITY = 80
 
@@ -42,6 +43,7 @@ class Translator:
         self.data: list[int] = []
         self.symbols: dict[str, int] = {}
         self.types: dict[str, str] = {}
+        self.arrays: dict[str, int] = {}
         self.pstr_capacity: dict[str, int] = {}
         self.blocks: list[tuple] = []
         self.ast: list[Statement] = []
@@ -81,9 +83,15 @@ class Translator:
 
     def parse_line(self, line_no: int, line: str) -> Statement:
         if line.startswith("var "):
+            array_match = ARRAY_DECL_RE.fullmatch(line)
+            if array_match:
+                name, raw_size = array_match.groups()
+                self.declare_array(name, int(raw_size), line_no)
+                return Statement("var", line_no, name=name, type_name="num[]")
+
             parts = line.split()
             if len(parts) != 3 or parts[1] not in {"num", "char", "pstr"}:
-                raise SyntaxError(f"line {line_no}: expected 'var <num|char|pstr> <id>'")
+                raise SyntaxError(f"line {line_no}: expected 'var <num|char|pstr> <id>' or 'var num <id>[<size>]'")
             self.declare_var(parts[2], parts[1])
             return Statement("var", line_no, name=parts[2], type_name=parts[1])
 
@@ -108,18 +116,18 @@ class Translator:
                 raise SyntaxError(f"line {line_no}: expected 'set <id> = <expr>'")
             name = name.strip()
             expr = expr.strip()
-            self.require_type(name, {"num", "char"}, line_no)
+            self.validate_lvalue(name, {"num", "char"}, line_no)
             self.validate_expr(expr, line_no)
             return Statement("set", line_no, name=name, expr=expr)
 
         if line.startswith("input(") and line.endswith(")"):
             name = line[6:-1].strip()
-            self.require_type(name, {"num", "char", "pstr"}, line_no)
+            self.validate_lvalue(name, {"num", "char", "pstr"}, line_no)
             return Statement("input", line_no, name=name)
 
         if line.startswith("print(") and line.endswith(")"):
             expr = line[6:-1].strip()
-            if expr not in self.types:
+            if not (expr in self.types and self.types[expr] == "pstr" and expr not in self.arrays):
                 self.validate_expr(expr, line_no)
             return Statement("print", line_no, expr=expr)
 
@@ -152,6 +160,17 @@ class Translator:
         else:
             self.data.append(0)
 
+    def declare_array(self, name: str, size: int, line_no: int) -> None:
+        self.validate_identifier(name)
+        if name in self.types:
+            raise SyntaxError(f"line {line_no}: name already declared: {name}")
+        if size <= 0:
+            raise SyntaxError(f"line {line_no}: array size must be positive")
+        self.types[name] = "num"
+        self.arrays[name] = size
+        self.symbols[name] = len(self.data)
+        self.data.extend([0] * size)
+
     def declare_pstr_literal(self, name: str, text: str) -> None:
         self.validate_identifier(name)
         if name in self.types:
@@ -169,14 +188,53 @@ class Translator:
             raise SyntaxError(f"bad identifier: {name}")
 
     def require_type(self, name: str, allowed: set[str], line_no: int) -> None:
+        if name in self.arrays or self.types.get(name) not in allowed:
+            raise SyntaxError(f"line {line_no}: unexpected or undeclared identifier '{name}'")
+
+    def require_lvalue_name(self, name: str, allowed: set[str], line_no: int) -> None:
         if self.types.get(name) not in allowed:
             raise SyntaxError(f"line {line_no}: unexpected or undeclared identifier '{name}'")
 
-    def validate_expr(self, expr: str, line_no: int) -> None:
+    def parse_expr(self, expr: str, line_no: int, what: str = "expression") -> ast.AST:
         try:
-            node = ast.parse(expr, mode="eval").body
+            return ast.parse(expr, mode="eval").body
         except SyntaxError as exc:
-            raise SyntaxError(f"line {line_no}: bad expression '{expr}'") from exc
+            raise SyntaxError(f"line {line_no}: bad {what} '{expr}'") from exc
+
+    def parse_lvalue(self, text: str, line_no: int) -> ast.Name | ast.Subscript:
+        node = self.parse_expr(text, line_no, "lvalue")
+        if isinstance(node, ast.Name):
+            return node
+        if isinstance(node, ast.Subscript):
+            self.array_name(node, line_no)
+            return node
+        raise SyntaxError(f"line {line_no}: bad lvalue '{text}'")
+
+    def validate_lvalue(self, text: str, allowed: set[str], line_no: int) -> None:
+        node = self.parse_lvalue(text, line_no)
+        if isinstance(node, ast.Name):
+            self.require_lvalue_name(node.id, allowed, line_no)
+            if node.id in self.arrays:
+                raise SyntaxError(f"line {line_no}: array '{node.id}' requires index")
+            return
+        name = self.array_name(node, line_no)
+        self.require_lvalue_name(name, {"num"}, line_no)
+        if "num" not in allowed:
+            raise SyntaxError(f"line {line_no}: array element is not allowed here")
+        self.validate_expr_node(node.slice, text, line_no)
+
+    def array_name(self, node: ast.Subscript, line_no: int) -> str:
+        if not isinstance(node.value, ast.Name):
+            raise SyntaxError(f"line {line_no}: array name expected")
+        name = node.value.id
+        if name not in self.arrays:
+            raise SyntaxError(f"line {line_no}: undeclared array '{name}'")
+        if isinstance(node.slice, ast.Slice):
+            raise SyntaxError(f"line {line_no}: array slices are not supported")
+        return name
+
+    def validate_expr(self, expr: str, line_no: int) -> None:
+        node = self.parse_expr(expr, line_no)
         self.validate_expr_node(node, expr, line_no)
 
     def validate_expr_node(self, node: ast.AST, source: str, line_no: int) -> None:
@@ -189,6 +247,11 @@ class Translator:
         # <id>
         if isinstance(node, ast.Name):
             self.require_type(node.id, {"num", "char"}, line_no)
+            return
+        # <index-access>
+        if isinstance(node, ast.Subscript):
+            self.array_name(node, line_no)
+            self.validate_expr_node(node.slice, source, line_no)
             return
         # - <atom>
         if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
@@ -263,8 +326,7 @@ class Translator:
         if statement.kind in {"var", "pstr"}:
             return
         if statement.kind == "set":
-            self.emit_expr(statement.expr)
-            self.emit(Opcode.ST, self.data_ref(self.symbols[statement.name]))
+            self.emit_set(statement.name, statement.expr, statement.line)
             return
         if statement.kind == "input":
             self.emit_input(statement.name)
@@ -310,6 +372,13 @@ class Translator:
         if isinstance(node, ast.Name):
             self.emit(Opcode.LD, self.data_ref(self.symbols[node.id]))
             return
+        if isinstance(node, ast.Subscript):
+            address = self.alloc_expr_temp()
+            self.emit_array_address(node)
+            self.emit(Opcode.ST, self.data_ref(address))
+            self.emit(Opcode.LD_IND, self.data_ref(address))
+            self.free_expr_temp(address)
+            return
         if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
             self.emit_expr_node(node.operand)
             self.emit(Opcode.NEG)
@@ -340,6 +409,25 @@ class Translator:
             self.free_expr_temp(left)
             return
         raise AssertionError(f"unsupported expression node: {ast.dump(node)}")
+
+    def emit_set(self, target: str, expr: str, line_no: int) -> None:
+        node = self.parse_lvalue(target, line_no)
+        if isinstance(node, ast.Name):
+            self.emit_expr(expr)
+            self.emit(Opcode.ST, self.data_ref(self.symbols[node.id]))
+            return
+
+        address = self.alloc_expr_temp()
+        self.emit_array_address(node)
+        self.emit(Opcode.ST, self.data_ref(address))
+        self.emit_expr(expr)
+        self.emit(Opcode.ST_IND, self.data_ref(address))
+        self.free_expr_temp(address)
+
+    def emit_array_address(self, node: ast.Subscript) -> None:
+        name = self.array_name(node, 0)
+        self.emit_expr_node(node.slice)
+        self.emit(Opcode.ADDI, self.data_ref(self.symbols[name]))
 
     def emit_false_jump(self, condition: str) -> int:
         match = COND_RE.fullmatch(condition)
@@ -377,6 +465,16 @@ class Translator:
         raise AssertionError(f"unsupported comparison: {op}")
 
     def emit_input(self, name: str) -> None:
+        node = self.parse_lvalue(name, 0)
+        if isinstance(node, ast.Subscript):
+            address = self.alloc_expr_temp()
+            self.emit_array_address(node)
+            self.emit(Opcode.ST, self.data_ref(address))
+            self.emit(Opcode.LD, self.raw(IN_PORT))
+            self.emit(Opcode.ST_IND, self.data_ref(address))
+            self.free_expr_temp(address)
+            return
+
         if self.types[name] in {"num", "char"}:
             self.emit(Opcode.LD, self.raw(IN_PORT))
             self.emit(Opcode.ST, self.data_ref(self.symbols[name]))
@@ -469,6 +567,8 @@ class Translator:
                 if value:
                     attrs.append(f"{field}={value!r}")
             lines.append(f"{statement.kind}(" + ", ".join(attrs) + ")")
+            if "[" in statement.name:
+                self.collect_expr_ast(ast.parse(statement.name, mode="eval").body, "  target: ", "  ", lines)
             if statement.expr:
                 self.collect_expr_ast(ast.parse(statement.expr, mode="eval").body, "  expr: ", "  ", lines)
             if statement.condition:
@@ -486,6 +586,11 @@ class Translator:
             return
         if isinstance(node, ast.Name):
             lines.append(f"{prefix}Identifier(name={node.id!r})")
+            return
+        if isinstance(node, ast.Subscript):
+            name = node.value.id if isinstance(node.value, ast.Name) else "?"
+            lines.append(f"{prefix}IndexAccess(name={name!r})")
+            self.collect_expr_ast(node.slice, f"{child_prefix}index: ", f"{child_prefix}  ", lines)
             return
         if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
             lines.append(f"{prefix}UnaryExpr(op='-')")
