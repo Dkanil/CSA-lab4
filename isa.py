@@ -64,7 +64,72 @@ class Instruction:
     def __str__(self) -> str:
         if self.opcode in {Opcode.NEG, Opcode.HLT}:
             return self.opcode.name.lower()
-        return f"{self.opcode.name.lower()} {self.operand}" # todo мнемонику подробнее надо
+        return f"{self.opcode.name.lower()} {self.operand}"
+
+
+def format_address(address: int) -> str:
+    if address == IN_PORT:
+        return "IN_PORT"
+    if address == OUT_PORT:
+        return "OUT_PORT"
+    return f"mem[{address}]"
+
+
+def mnemonic(instruction: Instruction) -> str:
+    op = instruction.opcode
+    arg = instruction.operand
+    addr = format_address(arg)
+
+    if op == Opcode.LD:
+        return f"ld {arg}: ACC <- {addr}"
+    if op == Opcode.LDI:
+        return f"ldi {arg}: ACC <- {arg}"
+    if op == Opcode.LD_IND:
+        return f"ld_ind {arg}: ACC <- mem[{addr}]"
+    if op == Opcode.ST:
+        return f"st {arg}: {addr} <- ACC"
+    if op == Opcode.ST_IND:
+        return f"st_ind {arg}: mem[{addr}] <- ACC"
+
+    if op == Opcode.ADD:
+        return f"add {arg}: ACC <- ACC + {addr}"
+    if op == Opcode.ADDI:
+        return f"addi {arg}: ACC <- ACC + {arg}"
+    if op == Opcode.SUB:
+        return f"sub {arg}: ACC <- ACC - {addr}"
+    if op == Opcode.SUBI:
+        return f"subi {arg}: ACC <- ACC - {arg}"
+    if op == Opcode.MUL:
+        return f"mul {arg}: ACC <- ACC * {addr}"
+    if op == Opcode.DIV:
+        return f"div {arg}: ACC <- ACC // {addr}"
+    if op == Opcode.MOD:
+        return f"mod {arg}: ACC <- ACC % {addr}"
+    if op == Opcode.CMP:
+        return f"cmp {arg}: flags <- ACC - {addr}"
+    if op == Opcode.CMPI:
+        return f"cmpi {arg}: flags <- ACC - {arg}"
+    if op == Opcode.NEG:
+        return "neg: ACC <- -ACC"
+
+    if op == Opcode.JMP:
+        return f"jmp {arg}: PC <- {arg}"
+    if op == Opcode.BEQ:
+        return f"beq {arg}: if Z then PC <- {arg}"
+    if op == Opcode.BNE:
+        return f"bne {arg}: if not Z then PC <- {arg}"
+    if op == Opcode.BLT:
+        return f"blt {arg}: if N then PC <- {arg}"
+    if op == Opcode.BGT:
+        return f"bgt {arg}: if not N and not Z then PC <- {arg}"
+    if op == Opcode.BLE:
+        return f"ble {arg}: if N or Z then PC <- {arg}"
+    if op == Opcode.BGE:
+        return f"bge {arg}: if not N or Z then PC <- {arg}"
+
+    if op == Opcode.HLT:
+        return "hlt: halt"
+    return str(instruction)
 
 
 def to_signed32(value: int) -> int:
@@ -96,7 +161,7 @@ def to_listing(instructions: list[Instruction], data: list[int]) -> str:
     lines = [f"# entry {CODE_BASE}", "# code"]
     for offset, instruction in enumerate(instructions):
         address = CODE_BASE + offset
-        lines.append(f"{address:04} - {instruction.encode():08X} - {instruction}")
+        lines.append(f"{address:04} - {instruction.encode():08X} - {mnemonic(instruction)}")
 
     lines.append("# data")
     for offset, value in enumerate(data):
