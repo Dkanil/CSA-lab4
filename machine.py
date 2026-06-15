@@ -327,15 +327,25 @@ def output_as_text(values: list[int]) -> str:
     return "".join(chars)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Run microcoded processor model")
-    parser.add_argument("program", help="binary memory image produced by translator.py")
-    parser.add_argument("input", nargs="?", help="optional input stream file")
-    parser.add_argument("--trace", help="optional trace output file")
-    parser.add_argument("--limit", type=int, default=100000, help="maximum tick count")
-    args = parser.parse_args()
+def main(
+    program: str | None = None,
+    input_file: str | None = None,
+    trace_file: str | None = None,
+    limit: int = 100000,
+) -> None:
+    if program is None:
+        parser = argparse.ArgumentParser(description="Run microcoded processor model")
+        parser.add_argument("program", help="binary memory image produced by translator.py")
+        parser.add_argument("input", nargs="?", help="optional input stream file")
+        parser.add_argument("--trace", help="optional trace output file")
+        parser.add_argument("--limit", type=int, default=100000, help="maximum tick count")
+        args = parser.parse_args()
+        program = args.program
+        input_file = args.input
+        trace_file = args.trace
+        limit = args.limit
 
-    cu = simulate(args.program, args.input, args.trace, args.limit)
+    cu = simulate(program, input_file, trace_file, limit)
     output = [to_signed32(value) for value in cu.datapath.memory.output_buffer]
     text = output_as_text(cu.datapath.memory.output_buffer)
 

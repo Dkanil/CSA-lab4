@@ -1,0 +1,321 @@
+in_source: |-
+  var num left
+  var char ch
+
+  input(left)
+  while left > 0:
+      input(ch)
+      print(ch)
+      set left = left - 1
+  end
+in_stdin:
+- 5
+- 104
+- 101
+- 108
+- 108
+- 111
+in_limit: 100000
+out_code: !!binary |
+  AAAAAgAAABIAAAAAAAAAABAAAAATAAAQEAAAECgAAAA1AAAPEAAAABMAABEQAAAREwAAARAAABAj
+  AAABEwAAEDAAAAT/AAAAAAAAAAAAAAA=
+out_code_hex: |-
+  # entry 2
+  # code
+  0002 - 10000000 - ld 0: ACC <- IN_PORT
+  0003 - 13000010 - st 16: mem[16] <- ACC
+  0004 - 10000010 - ld 16: ACC <- mem[16]
+  0005 - 28000000 - cmpi 0: flags <- ACC - 0
+  0006 - 3500000F - ble 15: if N or Z then PC <- 15
+  0007 - 10000000 - ld 0: ACC <- IN_PORT
+  0008 - 13000011 - st 17: mem[17] <- ACC
+  0009 - 10000011 - ld 17: ACC <- mem[17]
+  0010 - 13000001 - st 1: OUT_PORT <- ACC
+  0011 - 10000010 - ld 16: ACC <- mem[16]
+  0012 - 23000001 - subi 1: ACC <- ACC - 1
+  0013 - 13000010 - st 16: mem[16] <- ACC
+  0014 - 30000004 - jmp 4: PC <- 4
+  0015 - FF000000 - hlt: halt
+  # data
+  0016 - 00000000 - 0
+  0017 - 00000000 - 0
+out_ast: |-
+  var(line=1, name='left', type_name='num')
+  var(line=2, name='ch', type_name='char')
+  input(line=4, name='left')
+  while(line=5, condition='left > 0')
+    condition_op: '>'
+    left: Identifier(name='left')
+    right: Literal(value=0)
+  input(line=6, name='ch')
+  print(line=7, expr='ch')
+    expr: Identifier(name='ch')
+  set(line=8, name='left', expr='left - 1')
+    expr: BinaryExpr(op='-')
+    left: Identifier(name='left')
+    right: Literal(value=1)
+  end(line=9)
+out_stdout: |
+  Строк в исходном коде: 9
+  Строк в машинном коде: 14
+  Машинных слов памяти необходимого для выполнения программы: 2
+
+  Чудо скомпилировалось в следующие файлы:
+  Бинарник: target.bin
+  Машинный код: target.bin.lst
+  AST дерево: target.bin.ast
+  ============================================================
+  stop_reason: halt
+  instr: 61 ticks: 249
+  output: [104, 101, 108, 108, 111]
+  text: hello
+out_log: |-
+  tick=000001 mPC=000 FETCH  pc=00000003 ar=00000002 dr=10000000 acc=00000000 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000002 mPC=001 FETCH  pc=00000003 ar=00000003 dr=10000000 acc=00000000 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000003 mPC=002 LD     pc=00000003 ar=00000000 dr=10000000 acc=00000000 z=0 n=0 | AR <- DR.arg
+  tick=000004 mPC=003 LD     pc=00000003 ar=00000000 dr=00000005 acc=00000000 z=0 n=0 | DR <- Memory[AR]
+  tick=000005 mPC=004 LD     pc=00000003 ar=00000003 dr=00000005 acc=00000005 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000006 mPC=000 FETCH  pc=00000004 ar=00000003 dr=13000010 acc=00000005 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000007 mPC=001 FETCH  pc=00000004 ar=00000004 dr=13000010 acc=00000005 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000008 mPC=011 ST     pc=00000004 ar=00000010 dr=13000010 acc=00000005 z=0 n=0 | AR <- DR.arg
+  tick=000009 mPC=012 ST     pc=00000004 ar=00000004 dr=13000010 acc=00000005 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000010 mPC=000 FETCH  pc=00000005 ar=00000004 dr=10000010 acc=00000005 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000011 mPC=001 FETCH  pc=00000005 ar=00000005 dr=10000010 acc=00000005 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000012 mPC=002 LD     pc=00000005 ar=00000010 dr=10000010 acc=00000005 z=0 n=0 | AR <- DR.arg
+  tick=000013 mPC=003 LD     pc=00000005 ar=00000010 dr=00000005 acc=00000005 z=0 n=0 | DR <- Memory[AR]
+  tick=000014 mPC=004 LD     pc=00000005 ar=00000005 dr=00000005 acc=00000005 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000015 mPC=000 FETCH  pc=00000006 ar=00000005 dr=28000000 acc=00000005 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000016 mPC=001 FETCH  pc=00000006 ar=00000006 dr=28000000 acc=00000005 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000017 mPC=037 CMPI   pc=00000006 ar=00000006 dr=28000000 acc=00000005 z=0 n=0 | flags <- ACC - DR.arg; AR <- PC; -> FETCH
+  tick=000018 mPC=000 FETCH  pc=00000007 ar=00000006 dr=3500000F acc=00000005 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000019 mPC=001 FETCH  pc=00000007 ar=00000007 dr=3500000F acc=00000005 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000020 mPC=048 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000005 z=0 n=0 | if last cmp <= 0 -> JMP
+  tick=000021 mPC=049 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000005 z=0 n=0 | AR <- PC; -> FETCH
+  tick=000022 mPC=000 FETCH  pc=00000008 ar=00000007 dr=10000000 acc=00000005 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000023 mPC=001 FETCH  pc=00000008 ar=00000008 dr=10000000 acc=00000005 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000024 mPC=002 LD     pc=00000008 ar=00000000 dr=10000000 acc=00000005 z=0 n=0 | AR <- DR.arg
+  tick=000025 mPC=003 LD     pc=00000008 ar=00000000 dr=00000068 acc=00000005 z=0 n=0 | DR <- Memory[AR]
+  tick=000026 mPC=004 LD     pc=00000008 ar=00000008 dr=00000068 acc=00000068 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000027 mPC=000 FETCH  pc=00000009 ar=00000008 dr=13000011 acc=00000068 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000028 mPC=001 FETCH  pc=00000009 ar=00000009 dr=13000011 acc=00000068 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000029 mPC=011 ST     pc=00000009 ar=00000011 dr=13000011 acc=00000068 z=0 n=0 | AR <- DR.arg
+  tick=000030 mPC=012 ST     pc=00000009 ar=00000009 dr=13000011 acc=00000068 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000031 mPC=000 FETCH  pc=0000000A ar=00000009 dr=10000011 acc=00000068 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000032 mPC=001 FETCH  pc=0000000A ar=0000000A dr=10000011 acc=00000068 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000033 mPC=002 LD     pc=0000000A ar=00000011 dr=10000011 acc=00000068 z=0 n=0 | AR <- DR.arg
+  tick=000034 mPC=003 LD     pc=0000000A ar=00000011 dr=00000068 acc=00000068 z=0 n=0 | DR <- Memory[AR]
+  tick=000035 mPC=004 LD     pc=0000000A ar=0000000A dr=00000068 acc=00000068 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000036 mPC=000 FETCH  pc=0000000B ar=0000000A dr=13000001 acc=00000068 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000037 mPC=001 FETCH  pc=0000000B ar=0000000B dr=13000001 acc=00000068 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000038 mPC=011 ST     pc=0000000B ar=00000001 dr=13000001 acc=00000068 z=0 n=0 | AR <- DR.arg
+  tick=000039 mPC=012 ST     pc=0000000B ar=0000000B dr=13000001 acc=00000068 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000040 mPC=000 FETCH  pc=0000000C ar=0000000B dr=10000010 acc=00000068 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000041 mPC=001 FETCH  pc=0000000C ar=0000000C dr=10000010 acc=00000068 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000042 mPC=002 LD     pc=0000000C ar=00000010 dr=10000010 acc=00000068 z=0 n=0 | AR <- DR.arg
+  tick=000043 mPC=003 LD     pc=0000000C ar=00000010 dr=00000005 acc=00000068 z=0 n=0 | DR <- Memory[AR]
+  tick=000044 mPC=004 LD     pc=0000000C ar=0000000C dr=00000005 acc=00000005 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000045 mPC=000 FETCH  pc=0000000D ar=0000000C dr=23000001 acc=00000005 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000046 mPC=001 FETCH  pc=0000000D ar=0000000D dr=23000001 acc=00000005 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000047 mPC=036 SUBI   pc=0000000D ar=0000000D dr=23000001 acc=00000004 z=0 n=0 | ACC <- ACC - DR.arg; flags <- ACC; AR <- PC; -> FETCH
+  tick=000048 mPC=000 FETCH  pc=0000000E ar=0000000D dr=13000010 acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000049 mPC=001 FETCH  pc=0000000E ar=0000000E dr=13000010 acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000050 mPC=011 ST     pc=0000000E ar=00000010 dr=13000010 acc=00000004 z=0 n=0 | AR <- DR.arg
+  tick=000051 mPC=012 ST     pc=0000000E ar=0000000E dr=13000010 acc=00000004 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000052 mPC=000 FETCH  pc=0000000F ar=0000000E dr=30000004 acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000053 mPC=001 FETCH  pc=0000000F ar=0000000F dr=30000004 acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000054 mPC=039 JMP    pc=00000004 ar=00000004 dr=30000004 acc=00000004 z=0 n=0 | PC <- DR.arg; AR <- DR.arg; -> FETCH
+  tick=000055 mPC=000 FETCH  pc=00000005 ar=00000004 dr=10000010 acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000056 mPC=001 FETCH  pc=00000005 ar=00000005 dr=10000010 acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000057 mPC=002 LD     pc=00000005 ar=00000010 dr=10000010 acc=00000004 z=0 n=0 | AR <- DR.arg
+  tick=000058 mPC=003 LD     pc=00000005 ar=00000010 dr=00000004 acc=00000004 z=0 n=0 | DR <- Memory[AR]
+  tick=000059 mPC=004 LD     pc=00000005 ar=00000005 dr=00000004 acc=00000004 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000060 mPC=000 FETCH  pc=00000006 ar=00000005 dr=28000000 acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000061 mPC=001 FETCH  pc=00000006 ar=00000006 dr=28000000 acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000062 mPC=037 CMPI   pc=00000006 ar=00000006 dr=28000000 acc=00000004 z=0 n=0 | flags <- ACC - DR.arg; AR <- PC; -> FETCH
+  tick=000063 mPC=000 FETCH  pc=00000007 ar=00000006 dr=3500000F acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000064 mPC=001 FETCH  pc=00000007 ar=00000007 dr=3500000F acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000065 mPC=048 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000004 z=0 n=0 | if last cmp <= 0 -> JMP
+  tick=000066 mPC=049 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000004 z=0 n=0 | AR <- PC; -> FETCH
+  tick=000067 mPC=000 FETCH  pc=00000008 ar=00000007 dr=10000000 acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000068 mPC=001 FETCH  pc=00000008 ar=00000008 dr=10000000 acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000069 mPC=002 LD     pc=00000008 ar=00000000 dr=10000000 acc=00000004 z=0 n=0 | AR <- DR.arg
+  tick=000070 mPC=003 LD     pc=00000008 ar=00000000 dr=00000065 acc=00000004 z=0 n=0 | DR <- Memory[AR]
+  tick=000071 mPC=004 LD     pc=00000008 ar=00000008 dr=00000065 acc=00000065 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000072 mPC=000 FETCH  pc=00000009 ar=00000008 dr=13000011 acc=00000065 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000073 mPC=001 FETCH  pc=00000009 ar=00000009 dr=13000011 acc=00000065 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000074 mPC=011 ST     pc=00000009 ar=00000011 dr=13000011 acc=00000065 z=0 n=0 | AR <- DR.arg
+  tick=000075 mPC=012 ST     pc=00000009 ar=00000009 dr=13000011 acc=00000065 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000076 mPC=000 FETCH  pc=0000000A ar=00000009 dr=10000011 acc=00000065 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000077 mPC=001 FETCH  pc=0000000A ar=0000000A dr=10000011 acc=00000065 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000078 mPC=002 LD     pc=0000000A ar=00000011 dr=10000011 acc=00000065 z=0 n=0 | AR <- DR.arg
+  tick=000079 mPC=003 LD     pc=0000000A ar=00000011 dr=00000065 acc=00000065 z=0 n=0 | DR <- Memory[AR]
+  tick=000080 mPC=004 LD     pc=0000000A ar=0000000A dr=00000065 acc=00000065 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000081 mPC=000 FETCH  pc=0000000B ar=0000000A dr=13000001 acc=00000065 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000082 mPC=001 FETCH  pc=0000000B ar=0000000B dr=13000001 acc=00000065 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000083 mPC=011 ST     pc=0000000B ar=00000001 dr=13000001 acc=00000065 z=0 n=0 | AR <- DR.arg
+  tick=000084 mPC=012 ST     pc=0000000B ar=0000000B dr=13000001 acc=00000065 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000085 mPC=000 FETCH  pc=0000000C ar=0000000B dr=10000010 acc=00000065 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000086 mPC=001 FETCH  pc=0000000C ar=0000000C dr=10000010 acc=00000065 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000087 mPC=002 LD     pc=0000000C ar=00000010 dr=10000010 acc=00000065 z=0 n=0 | AR <- DR.arg
+  tick=000088 mPC=003 LD     pc=0000000C ar=00000010 dr=00000004 acc=00000065 z=0 n=0 | DR <- Memory[AR]
+  tick=000089 mPC=004 LD     pc=0000000C ar=0000000C dr=00000004 acc=00000004 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000090 mPC=000 FETCH  pc=0000000D ar=0000000C dr=23000001 acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000091 mPC=001 FETCH  pc=0000000D ar=0000000D dr=23000001 acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000092 mPC=036 SUBI   pc=0000000D ar=0000000D dr=23000001 acc=00000003 z=0 n=0 | ACC <- ACC - DR.arg; flags <- ACC; AR <- PC; -> FETCH
+  tick=000093 mPC=000 FETCH  pc=0000000E ar=0000000D dr=13000010 acc=00000003 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000094 mPC=001 FETCH  pc=0000000E ar=0000000E dr=13000010 acc=00000003 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000095 mPC=011 ST     pc=0000000E ar=00000010 dr=13000010 acc=00000003 z=0 n=0 | AR <- DR.arg
+  tick=000096 mPC=012 ST     pc=0000000E ar=0000000E dr=13000010 acc=00000003 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000097 mPC=000 FETCH  pc=0000000F ar=0000000E dr=30000004 acc=00000003 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000098 mPC=001 FETCH  pc=0000000F ar=0000000F dr=30000004 acc=00000003 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000099 mPC=039 JMP    pc=00000004 ar=00000004 dr=30000004 acc=00000003 z=0 n=0 | PC <- DR.arg; AR <- DR.arg; -> FETCH
+  tick=000100 mPC=000 FETCH  pc=00000005 ar=00000004 dr=10000010 acc=00000003 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000101 mPC=001 FETCH  pc=00000005 ar=00000005 dr=10000010 acc=00000003 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000102 mPC=002 LD     pc=00000005 ar=00000010 dr=10000010 acc=00000003 z=0 n=0 | AR <- DR.arg
+  tick=000103 mPC=003 LD     pc=00000005 ar=00000010 dr=00000003 acc=00000003 z=0 n=0 | DR <- Memory[AR]
+  tick=000104 mPC=004 LD     pc=00000005 ar=00000005 dr=00000003 acc=00000003 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000105 mPC=000 FETCH  pc=00000006 ar=00000005 dr=28000000 acc=00000003 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000106 mPC=001 FETCH  pc=00000006 ar=00000006 dr=28000000 acc=00000003 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000107 mPC=037 CMPI   pc=00000006 ar=00000006 dr=28000000 acc=00000003 z=0 n=0 | flags <- ACC - DR.arg; AR <- PC; -> FETCH
+  tick=000108 mPC=000 FETCH  pc=00000007 ar=00000006 dr=3500000F acc=00000003 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000109 mPC=001 FETCH  pc=00000007 ar=00000007 dr=3500000F acc=00000003 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000110 mPC=048 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000003 z=0 n=0 | if last cmp <= 0 -> JMP
+  tick=000111 mPC=049 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000003 z=0 n=0 | AR <- PC; -> FETCH
+  tick=000112 mPC=000 FETCH  pc=00000008 ar=00000007 dr=10000000 acc=00000003 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000113 mPC=001 FETCH  pc=00000008 ar=00000008 dr=10000000 acc=00000003 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000114 mPC=002 LD     pc=00000008 ar=00000000 dr=10000000 acc=00000003 z=0 n=0 | AR <- DR.arg
+  tick=000115 mPC=003 LD     pc=00000008 ar=00000000 dr=0000006C acc=00000003 z=0 n=0 | DR <- Memory[AR]
+  tick=000116 mPC=004 LD     pc=00000008 ar=00000008 dr=0000006C acc=0000006C z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000117 mPC=000 FETCH  pc=00000009 ar=00000008 dr=13000011 acc=0000006C z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000118 mPC=001 FETCH  pc=00000009 ar=00000009 dr=13000011 acc=0000006C z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000119 mPC=011 ST     pc=00000009 ar=00000011 dr=13000011 acc=0000006C z=0 n=0 | AR <- DR.arg
+  tick=000120 mPC=012 ST     pc=00000009 ar=00000009 dr=13000011 acc=0000006C z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000121 mPC=000 FETCH  pc=0000000A ar=00000009 dr=10000011 acc=0000006C z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000122 mPC=001 FETCH  pc=0000000A ar=0000000A dr=10000011 acc=0000006C z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000123 mPC=002 LD     pc=0000000A ar=00000011 dr=10000011 acc=0000006C z=0 n=0 | AR <- DR.arg
+  tick=000124 mPC=003 LD     pc=0000000A ar=00000011 dr=0000006C acc=0000006C z=0 n=0 | DR <- Memory[AR]
+  tick=000125 mPC=004 LD     pc=0000000A ar=0000000A dr=0000006C acc=0000006C z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000126 mPC=000 FETCH  pc=0000000B ar=0000000A dr=13000001 acc=0000006C z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000127 mPC=001 FETCH  pc=0000000B ar=0000000B dr=13000001 acc=0000006C z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000128 mPC=011 ST     pc=0000000B ar=00000001 dr=13000001 acc=0000006C z=0 n=0 | AR <- DR.arg
+  tick=000129 mPC=012 ST     pc=0000000B ar=0000000B dr=13000001 acc=0000006C z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000130 mPC=000 FETCH  pc=0000000C ar=0000000B dr=10000010 acc=0000006C z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000131 mPC=001 FETCH  pc=0000000C ar=0000000C dr=10000010 acc=0000006C z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000132 mPC=002 LD     pc=0000000C ar=00000010 dr=10000010 acc=0000006C z=0 n=0 | AR <- DR.arg
+  tick=000133 mPC=003 LD     pc=0000000C ar=00000010 dr=00000003 acc=0000006C z=0 n=0 | DR <- Memory[AR]
+  tick=000134 mPC=004 LD     pc=0000000C ar=0000000C dr=00000003 acc=00000003 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000135 mPC=000 FETCH  pc=0000000D ar=0000000C dr=23000001 acc=00000003 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000136 mPC=001 FETCH  pc=0000000D ar=0000000D dr=23000001 acc=00000003 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000137 mPC=036 SUBI   pc=0000000D ar=0000000D dr=23000001 acc=00000002 z=0 n=0 | ACC <- ACC - DR.arg; flags <- ACC; AR <- PC; -> FETCH
+  tick=000138 mPC=000 FETCH  pc=0000000E ar=0000000D dr=13000010 acc=00000002 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000139 mPC=001 FETCH  pc=0000000E ar=0000000E dr=13000010 acc=00000002 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000140 mPC=011 ST     pc=0000000E ar=00000010 dr=13000010 acc=00000002 z=0 n=0 | AR <- DR.arg
+  tick=000141 mPC=012 ST     pc=0000000E ar=0000000E dr=13000010 acc=00000002 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000142 mPC=000 FETCH  pc=0000000F ar=0000000E dr=30000004 acc=00000002 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000143 mPC=001 FETCH  pc=0000000F ar=0000000F dr=30000004 acc=00000002 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000144 mPC=039 JMP    pc=00000004 ar=00000004 dr=30000004 acc=00000002 z=0 n=0 | PC <- DR.arg; AR <- DR.arg; -> FETCH
+  tick=000145 mPC=000 FETCH  pc=00000005 ar=00000004 dr=10000010 acc=00000002 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000146 mPC=001 FETCH  pc=00000005 ar=00000005 dr=10000010 acc=00000002 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000147 mPC=002 LD     pc=00000005 ar=00000010 dr=10000010 acc=00000002 z=0 n=0 | AR <- DR.arg
+  tick=000148 mPC=003 LD     pc=00000005 ar=00000010 dr=00000002 acc=00000002 z=0 n=0 | DR <- Memory[AR]
+  tick=000149 mPC=004 LD     pc=00000005 ar=00000005 dr=00000002 acc=00000002 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000150 mPC=000 FETCH  pc=00000006 ar=00000005 dr=28000000 acc=00000002 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000151 mPC=001 FETCH  pc=00000006 ar=00000006 dr=28000000 acc=00000002 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000152 mPC=037 CMPI   pc=00000006 ar=00000006 dr=28000000 acc=00000002 z=0 n=0 | flags <- ACC - DR.arg; AR <- PC; -> FETCH
+  tick=000153 mPC=000 FETCH  pc=00000007 ar=00000006 dr=3500000F acc=00000002 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000154 mPC=001 FETCH  pc=00000007 ar=00000007 dr=3500000F acc=00000002 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000155 mPC=048 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000002 z=0 n=0 | if last cmp <= 0 -> JMP
+  tick=000156 mPC=049 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000002 z=0 n=0 | AR <- PC; -> FETCH
+  tick=000157 mPC=000 FETCH  pc=00000008 ar=00000007 dr=10000000 acc=00000002 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000158 mPC=001 FETCH  pc=00000008 ar=00000008 dr=10000000 acc=00000002 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000159 mPC=002 LD     pc=00000008 ar=00000000 dr=10000000 acc=00000002 z=0 n=0 | AR <- DR.arg
+  tick=000160 mPC=003 LD     pc=00000008 ar=00000000 dr=0000006C acc=00000002 z=0 n=0 | DR <- Memory[AR]
+  tick=000161 mPC=004 LD     pc=00000008 ar=00000008 dr=0000006C acc=0000006C z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000162 mPC=000 FETCH  pc=00000009 ar=00000008 dr=13000011 acc=0000006C z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000163 mPC=001 FETCH  pc=00000009 ar=00000009 dr=13000011 acc=0000006C z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000164 mPC=011 ST     pc=00000009 ar=00000011 dr=13000011 acc=0000006C z=0 n=0 | AR <- DR.arg
+  tick=000165 mPC=012 ST     pc=00000009 ar=00000009 dr=13000011 acc=0000006C z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000166 mPC=000 FETCH  pc=0000000A ar=00000009 dr=10000011 acc=0000006C z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000167 mPC=001 FETCH  pc=0000000A ar=0000000A dr=10000011 acc=0000006C z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000168 mPC=002 LD     pc=0000000A ar=00000011 dr=10000011 acc=0000006C z=0 n=0 | AR <- DR.arg
+  tick=000169 mPC=003 LD     pc=0000000A ar=00000011 dr=0000006C acc=0000006C z=0 n=0 | DR <- Memory[AR]
+  tick=000170 mPC=004 LD     pc=0000000A ar=0000000A dr=0000006C acc=0000006C z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000171 mPC=000 FETCH  pc=0000000B ar=0000000A dr=13000001 acc=0000006C z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000172 mPC=001 FETCH  pc=0000000B ar=0000000B dr=13000001 acc=0000006C z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000173 mPC=011 ST     pc=0000000B ar=00000001 dr=13000001 acc=0000006C z=0 n=0 | AR <- DR.arg
+  tick=000174 mPC=012 ST     pc=0000000B ar=0000000B dr=13000001 acc=0000006C z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000175 mPC=000 FETCH  pc=0000000C ar=0000000B dr=10000010 acc=0000006C z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000176 mPC=001 FETCH  pc=0000000C ar=0000000C dr=10000010 acc=0000006C z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000177 mPC=002 LD     pc=0000000C ar=00000010 dr=10000010 acc=0000006C z=0 n=0 | AR <- DR.arg
+  tick=000178 mPC=003 LD     pc=0000000C ar=00000010 dr=00000002 acc=0000006C z=0 n=0 | DR <- Memory[AR]
+  tick=000179 mPC=004 LD     pc=0000000C ar=0000000C dr=00000002 acc=00000002 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000180 mPC=000 FETCH  pc=0000000D ar=0000000C dr=23000001 acc=00000002 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000181 mPC=001 FETCH  pc=0000000D ar=0000000D dr=23000001 acc=00000002 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000182 mPC=036 SUBI   pc=0000000D ar=0000000D dr=23000001 acc=00000001 z=0 n=0 | ACC <- ACC - DR.arg; flags <- ACC; AR <- PC; -> FETCH
+  tick=000183 mPC=000 FETCH  pc=0000000E ar=0000000D dr=13000010 acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000184 mPC=001 FETCH  pc=0000000E ar=0000000E dr=13000010 acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000185 mPC=011 ST     pc=0000000E ar=00000010 dr=13000010 acc=00000001 z=0 n=0 | AR <- DR.arg
+  tick=000186 mPC=012 ST     pc=0000000E ar=0000000E dr=13000010 acc=00000001 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000187 mPC=000 FETCH  pc=0000000F ar=0000000E dr=30000004 acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000188 mPC=001 FETCH  pc=0000000F ar=0000000F dr=30000004 acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000189 mPC=039 JMP    pc=00000004 ar=00000004 dr=30000004 acc=00000001 z=0 n=0 | PC <- DR.arg; AR <- DR.arg; -> FETCH
+  tick=000190 mPC=000 FETCH  pc=00000005 ar=00000004 dr=10000010 acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000191 mPC=001 FETCH  pc=00000005 ar=00000005 dr=10000010 acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000192 mPC=002 LD     pc=00000005 ar=00000010 dr=10000010 acc=00000001 z=0 n=0 | AR <- DR.arg
+  tick=000193 mPC=003 LD     pc=00000005 ar=00000010 dr=00000001 acc=00000001 z=0 n=0 | DR <- Memory[AR]
+  tick=000194 mPC=004 LD     pc=00000005 ar=00000005 dr=00000001 acc=00000001 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000195 mPC=000 FETCH  pc=00000006 ar=00000005 dr=28000000 acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000196 mPC=001 FETCH  pc=00000006 ar=00000006 dr=28000000 acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000197 mPC=037 CMPI   pc=00000006 ar=00000006 dr=28000000 acc=00000001 z=0 n=0 | flags <- ACC - DR.arg; AR <- PC; -> FETCH
+  tick=000198 mPC=000 FETCH  pc=00000007 ar=00000006 dr=3500000F acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000199 mPC=001 FETCH  pc=00000007 ar=00000007 dr=3500000F acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000200 mPC=048 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000001 z=0 n=0 | if last cmp <= 0 -> JMP
+  tick=000201 mPC=049 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000001 z=0 n=0 | AR <- PC; -> FETCH
+  tick=000202 mPC=000 FETCH  pc=00000008 ar=00000007 dr=10000000 acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000203 mPC=001 FETCH  pc=00000008 ar=00000008 dr=10000000 acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000204 mPC=002 LD     pc=00000008 ar=00000000 dr=10000000 acc=00000001 z=0 n=0 | AR <- DR.arg
+  tick=000205 mPC=003 LD     pc=00000008 ar=00000000 dr=0000006F acc=00000001 z=0 n=0 | DR <- Memory[AR]
+  tick=000206 mPC=004 LD     pc=00000008 ar=00000008 dr=0000006F acc=0000006F z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000207 mPC=000 FETCH  pc=00000009 ar=00000008 dr=13000011 acc=0000006F z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000208 mPC=001 FETCH  pc=00000009 ar=00000009 dr=13000011 acc=0000006F z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000209 mPC=011 ST     pc=00000009 ar=00000011 dr=13000011 acc=0000006F z=0 n=0 | AR <- DR.arg
+  tick=000210 mPC=012 ST     pc=00000009 ar=00000009 dr=13000011 acc=0000006F z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000211 mPC=000 FETCH  pc=0000000A ar=00000009 dr=10000011 acc=0000006F z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000212 mPC=001 FETCH  pc=0000000A ar=0000000A dr=10000011 acc=0000006F z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000213 mPC=002 LD     pc=0000000A ar=00000011 dr=10000011 acc=0000006F z=0 n=0 | AR <- DR.arg
+  tick=000214 mPC=003 LD     pc=0000000A ar=00000011 dr=0000006F acc=0000006F z=0 n=0 | DR <- Memory[AR]
+  tick=000215 mPC=004 LD     pc=0000000A ar=0000000A dr=0000006F acc=0000006F z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000216 mPC=000 FETCH  pc=0000000B ar=0000000A dr=13000001 acc=0000006F z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000217 mPC=001 FETCH  pc=0000000B ar=0000000B dr=13000001 acc=0000006F z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000218 mPC=011 ST     pc=0000000B ar=00000001 dr=13000001 acc=0000006F z=0 n=0 | AR <- DR.arg
+  tick=000219 mPC=012 ST     pc=0000000B ar=0000000B dr=13000001 acc=0000006F z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000220 mPC=000 FETCH  pc=0000000C ar=0000000B dr=10000010 acc=0000006F z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000221 mPC=001 FETCH  pc=0000000C ar=0000000C dr=10000010 acc=0000006F z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000222 mPC=002 LD     pc=0000000C ar=00000010 dr=10000010 acc=0000006F z=0 n=0 | AR <- DR.arg
+  tick=000223 mPC=003 LD     pc=0000000C ar=00000010 dr=00000001 acc=0000006F z=0 n=0 | DR <- Memory[AR]
+  tick=000224 mPC=004 LD     pc=0000000C ar=0000000C dr=00000001 acc=00000001 z=0 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000225 mPC=000 FETCH  pc=0000000D ar=0000000C dr=23000001 acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000226 mPC=001 FETCH  pc=0000000D ar=0000000D dr=23000001 acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000227 mPC=036 SUBI   pc=0000000D ar=0000000D dr=23000001 acc=00000000 z=1 n=0 | ACC <- ACC - DR.arg; flags <- ACC; AR <- PC; -> FETCH
+  tick=000228 mPC=000 FETCH  pc=0000000E ar=0000000D dr=13000010 acc=00000000 z=1 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000229 mPC=001 FETCH  pc=0000000E ar=0000000E dr=13000010 acc=00000000 z=1 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000230 mPC=011 ST     pc=0000000E ar=00000010 dr=13000010 acc=00000000 z=1 n=0 | AR <- DR.arg
+  tick=000231 mPC=012 ST     pc=0000000E ar=0000000E dr=13000010 acc=00000000 z=1 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000232 mPC=000 FETCH  pc=0000000F ar=0000000E dr=30000004 acc=00000000 z=1 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000233 mPC=001 FETCH  pc=0000000F ar=0000000F dr=30000004 acc=00000000 z=1 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000234 mPC=039 JMP    pc=00000004 ar=00000004 dr=30000004 acc=00000000 z=1 n=0 | PC <- DR.arg; AR <- DR.arg; -> FETCH
+  tick=000235 mPC=000 FETCH  pc=00000005 ar=00000004 dr=10000010 acc=00000000 z=1 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000236 mPC=001 FETCH  pc=00000005 ar=00000005 dr=10000010 acc=00000000 z=1 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000237 mPC=002 LD     pc=00000005 ar=00000010 dr=10000010 acc=00000000 z=1 n=0 | AR <- DR.arg
+  tick=000238 mPC=003 LD     pc=00000005 ar=00000010 dr=00000000 acc=00000000 z=1 n=0 | DR <- Memory[AR]
+  tick=000239 mPC=004 LD     pc=00000005 ar=00000005 dr=00000000 acc=00000000 z=1 n=0 | ACC <- DR; flags <- ACC; AR <- PC; -> FETCH
+  tick=000240 mPC=000 FETCH  pc=00000006 ar=00000005 dr=28000000 acc=00000000 z=1 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000241 mPC=001 FETCH  pc=00000006 ar=00000006 dr=28000000 acc=00000000 z=1 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000242 mPC=037 CMPI   pc=00000006 ar=00000006 dr=28000000 acc=00000000 z=1 n=0 | flags <- ACC - DR.arg; AR <- PC; -> FETCH
+  tick=000243 mPC=000 FETCH  pc=00000007 ar=00000006 dr=3500000F acc=00000000 z=1 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000244 mPC=001 FETCH  pc=00000007 ar=00000007 dr=3500000F acc=00000000 z=1 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000245 mPC=048 BLE    pc=00000007 ar=00000007 dr=3500000F acc=00000000 z=1 n=0 | if last cmp <= 0 -> JMP
+  tick=000246 mPC=039 JMP    pc=0000000F ar=0000000F dr=3500000F acc=00000000 z=1 n=0 | PC <- DR.arg; AR <- DR.arg; -> FETCH
+  tick=000247 mPC=000 FETCH  pc=00000010 ar=0000000F dr=FF000000 acc=00000000 z=1 n=0 | DR <- Memory[AR]; PC <- PC + 1
+  tick=000248 mPC=001 FETCH  pc=00000010 ar=00000010 dr=FF000000 acc=00000000 z=1 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
+  tick=000249 mPC=052 HLT    pc=00000010 ar=00000010 dr=FF000000 acc=00000000 z=1 n=0 | HALT

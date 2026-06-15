@@ -615,14 +615,24 @@ def translate(source: str) -> tuple[list[Instruction], list[int], str]:
     return Translator().compile(source)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Translate source code to binary machine code")
-    parser.add_argument("source", help="source file")
-    parser.add_argument("target", help="target binary file")
-    args = parser.parse_args()
+def display_path(path: Path) -> str:
+    try:
+        return path.relative_to(Path.cwd()).as_posix()
+    except ValueError:
+        return path.name
 
-    source_path = Path(args.source)
-    target_path = Path(args.target)
+
+def main(source: str | None = None, target: str | None = None) -> None:
+    if source is None or target is None:
+        parser = argparse.ArgumentParser(description="Translate source code to binary machine code")
+        parser.add_argument("source", help="source file")
+        parser.add_argument("target", help="target binary file")
+        args = parser.parse_args()
+        source = args.source
+        target = args.target
+
+    source_path = Path(source)
+    target_path = Path(target)
     code, data, ast_dump = translate(source_path.read_text(encoding="utf-8"))
 
     target_path.parent.mkdir(parents=True, exist_ok=True)
@@ -636,9 +646,9 @@ def main() -> None:
     print(f"Строк в машинном коде: {len(code)}")
     print(f"Машинных слов памяти необходимого для выполнения программы: {len(data)}")
     print("\nЧудо скомпилировалось в следующие файлы:")
-    print(f"Бинарник: {target_path}")
-    print(f"Машинный код: {listing_path}")
-    print(f"AST дерево: {ast_path}")
+    print(f"Бинарник: {display_path(target_path)}")
+    print(f"Машинный код: {display_path(listing_path)}")
+    print(f"AST дерево: {display_path(ast_path)}")
 
 
 if __name__ == "__main__":

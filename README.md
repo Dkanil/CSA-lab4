@@ -314,4 +314,54 @@ source_file
 - `Condition Logic` - проверяет флаги для условных переходов.
 
 ## Тестирование
-todo
+Тестирование реализовано через golden tests. Тестовый pipeline описан в [`test_golden.py`](test_golden.py): для каждого YAML-кейса создаются временные файлы, запускаются транслятор и модель процессора, затем сверяются бинарный образ, листинг, AST, stdout и журнал микротактов.
+
+```bash
+pip install pytest pytest-golden
+pytest . -v
+```
+
+Golden tests:
+
+| Алгоритм           | Исходный код                                                     | Golden test                                                  | Что проверяет                                                                                           |
+|--------------------|------------------------------------------------------------------|--------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| `hello`            | [`examples/hello.alg`](examples/hello.alg)                       | [`golden/hello.yml`](golden/hello.yml)                       | Печать `Hello, World!`                                                                                  |
+| `cat`              | [`examples/cat.alg`](examples/cat.alg)                           | [`golden/cat.yml`](golden/cat.yml)                           | Байтовый stream-ввод в формате `pstr`: длина, затем символы; немедленный вывод символов                 |
+| `hello_user_name`  | [`examples/hello_user_name.alg`](examples/hello_user_name.alg)   | [`golden/hello_user_name.yml`](golden/hello_user_name.yml)   | Диалог `What is your name?` / `Alice` / `Hello, Alice!`                                                 |
+| `sort`             | [`examples/sort.alg`](examples/sort.alg)                         | [`golden/sort.yml`](golden/sort.yml)                         | Загрузка списка чисел в формате `pstr`-подобного потока: размер, затем элементы; пузырьковая сортировка |
+| `double_precision` | [`examples/double_precision.alg`](examples/double_precision.alg) | [`golden/double_precision.yml`](golden/double_precision.yml) | Арифметика двойной точности: сложение 64-битных чисел на 32-битном машинном слове                       |
+| `prob1`            | [`examples/prob1.alg`](examples/prob1.alg)                       | [`golden/prob1.yml`](golden/prob1.yml)                       | Алгоритм варианта: Project Euler problem 4                                                              |
+
+Каждый golden-файл включает:
+
+- исходный алгоритм;
+- входной поток;
+- бинарный машинный код и секцию данных;
+- текстовый листинг машинного кода;
+- AST;
+- stdout модели процессора;
+- журнал работы процессора по микротактам.
+
+Для всех тестов кроме `prob1` записывается полный журнал логов. В [`golden/prob1.yml`](golden/prob1.yml) сохраняется только первые строки логов, количество строк задаётся полем `out_log_head_lines`.
+
+Обновить эталоны можно командой:
+
+```bash
+pytest . -v --update-goldens
+```
+
+CI для GitHub Actions описан в `.github/workflows/tests.yml`.
+
+Пример использования:
+
+```bash
+python translator.py examples/hello.alg build/hello.bin
+python machine.py build/hello.bin --trace build/hello.log
+```
+
+Для программы с входным потоком:
+
+```bash
+python translator.py examples/sort.alg build/sort.bin
+python machine.py build/sort.bin build/sort.in --trace build/sort.log
+```
