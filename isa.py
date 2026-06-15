@@ -42,6 +42,29 @@ class Opcode(IntEnum):
     HLT = 0xFF
 
 
+IMMEDIATE_SIGNED_OPS = {Opcode.LDI, Opcode.ADDI, Opcode.SUBI, Opcode.CMPI}
+
+
+def decode_opcode(word: int) -> Opcode:
+    opcode_value = (word >> 24) & 0xFF
+    try:
+        return Opcode(opcode_value)
+    except ValueError as exc:
+        raise ValueError(f"unknown opcode: 0x{opcode_value:02X}") from exc
+
+
+def decode_operand(word: int) -> int:
+    return word & OPERAND_MASK
+
+
+def decode_arg(word: int) -> int:
+    opcode = decode_opcode(word)
+    operand = decode_operand(word)
+    if opcode in IMMEDIATE_SIGNED_OPS and operand & OPERAND_SIGN:
+        operand -= 1 << 24
+    return operand
+
+
 @dataclass
 class Instruction:
     opcode: Opcode
@@ -55,11 +78,7 @@ class Instruction:
 
     @staticmethod
     def decode(word: int) -> "Instruction":
-        opcode = Opcode((word >> 24) & 0xFF)
-        operand = word & OPERAND_MASK
-        if opcode in {Opcode.LDI, Opcode.ADDI, Opcode.SUBI, Opcode.CMPI} and operand & OPERAND_SIGN:
-            operand -= 1 << 24
-        return Instruction(opcode, operand)
+        return Instruction(decode_opcode(word), decode_arg(word))
 
     def __str__(self) -> str:
         if self.opcode in {Opcode.NEG, Opcode.HLT}:

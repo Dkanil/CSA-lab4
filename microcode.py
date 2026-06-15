@@ -119,6 +119,7 @@ put(12,
     "ST",
     "Memory[AR] <- ACC; AR <- PC; -> FETCH",
     mem_wr=True, ar_l=True, sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC, alu_control=AluControl.PASS_LEFT,
     cond_code=CondCode.ALWAYS, jmp_addr=0)
 
 # ST_IND: Mem[Mem[arg]] <- ACC
@@ -127,6 +128,7 @@ put(14, "ST_IND", "DR <- Memory[AR]", mem_r=True, dr_l=True)
 put(15, "ST_IND", "AR <- DR", ar_l=True, sel_ar=SelAr.DR)
 put(16, "ST_IND", "Memory[AR] <- ACC; AR <- PC; -> FETCH",
     mem_wr=True, ar_l=True, sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC, alu_control=AluControl.PASS_LEFT,
     cond_code=CondCode.ALWAYS, jmp_addr=0)
 
 # Memory arithmetic
