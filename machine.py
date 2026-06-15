@@ -65,6 +65,7 @@ class Memory:
         self.words = [word & WORD_MASK for word in words]
         self.input_buffer = deque(word & WORD_MASK for word in input_buffer)
         self.output_buffer: list[int] = []
+        self.io_events: list[str] = []
 
     def _ensure_address(self, address: int) -> None:
         if address < 0:
@@ -76,7 +77,9 @@ class Memory:
         if address == IN_PORT:
             if not self.input_buffer:
                 raise InputBufferEmpty("input buffer is empty")
-            return self.input_buffer.popleft()
+            value = self.input_buffer.popleft()
+            self.io_events.append(f"input {format_io_value(value)}")
+            return value
         self._ensure_address(address)
         return self.words[address]
 
@@ -84,9 +87,15 @@ class Memory:
         value &= WORD_MASK
         if address == OUT_PORT:
             self.output_buffer.append(value)
+            self.io_events.append(f"output {format_io_value(value)}")
             return
         self._ensure_address(address)
         self.words[address] = value
+
+    def drain_io_events(self) -> list[str]:
+        events = self.io_events
+        self.io_events = []
+        return events
 
 
 class DataPath:
@@ -294,14 +303,29 @@ def load_input(path: str | Path | None) -> list[int]:
     return list(Path(path).read_bytes())
 
 
+def format_io_value(value: int) -> str:
+    signed = to_signed32(value)
+    if 32 <= signed <= 126:
+        return f"{signed} '{chr(signed)}'"
+    if signed == 10:
+        return f"{signed} '\\n'"
+    if signed == 13:
+        return f"{signed} '\\r'"
+    if signed == 9:
+        return f"{signed} '\\t'"
+    return str(signed)
+
+
 def format_trace_line(cu: ControlUnit, executed_mpc: int) -> str:
     dp = cu.datapath
     instruction = MROM_LABEL[executed_mpc] or "?"
     desc = MROM_DESC[executed_mpc] or "NOP"
+    io_events = dp.memory.drain_io_events()
+    io_suffix = f" | io: {', '.join(io_events)}" if io_events else ""
     return (
         f"tick={cu.tick:06} mPC={executed_mpc:03} {instruction:<6} "
         f"pc={dp.pc & WORD_MASK:08X} ar={dp.ar & WORD_MASK:08X} dr={dp.dr & WORD_MASK:08X} "
-        f"acc={dp.acc & WORD_MASK:08X} z={int(dp.z)} n={int(dp.n)} | {desc}"
+        f"acc={dp.acc & WORD_MASK:08X} z={int(dp.z)} n={int(dp.n)} | {desc}{io_suffix}"
     )
 
 

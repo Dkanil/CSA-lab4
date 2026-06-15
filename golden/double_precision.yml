@@ -371,7 +371,7 @@ out_log: |-
   tick=000177 mPC=000 FETCH  pc=00000039 ar=00000038 dr=13000001 acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
   tick=000178 mPC=001 FETCH  pc=00000039 ar=00000039 dr=13000001 acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
   tick=000179 mPC=011 ST     pc=00000039 ar=00000001 dr=13000001 acc=00000004 z=0 n=0 | AR <- DR.arg
-  tick=000180 mPC=012 ST     pc=00000039 ar=00000039 dr=13000001 acc=00000004 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000180 mPC=012 ST     pc=00000039 ar=00000039 dr=13000001 acc=00000004 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH | io: output 4
   tick=000181 mPC=000 FETCH  pc=0000003A ar=00000039 dr=10000040 acc=00000004 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
   tick=000182 mPC=001 FETCH  pc=0000003A ar=0000003A dr=10000040 acc=00000004 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
   tick=000183 mPC=002 LD     pc=0000003A ar=00000040 dr=10000040 acc=00000004 z=0 n=0 | AR <- DR.arg
@@ -380,7 +380,7 @@ out_log: |-
   tick=000186 mPC=000 FETCH  pc=0000003B ar=0000003A dr=13000001 acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
   tick=000187 mPC=001 FETCH  pc=0000003B ar=0000003B dr=13000001 acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
   tick=000188 mPC=011 ST     pc=0000003B ar=00000001 dr=13000001 acc=00000001 z=0 n=0 | AR <- DR.arg
-  tick=000189 mPC=012 ST     pc=0000003B ar=0000003B dr=13000001 acc=00000001 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH
+  tick=000189 mPC=012 ST     pc=0000003B ar=0000003B dr=13000001 acc=00000001 z=0 n=0 | Memory[AR] <- ACC; AR <- PC; -> FETCH | io: output 1
   tick=000190 mPC=000 FETCH  pc=0000003C ar=0000003B dr=FF000000 acc=00000001 z=0 n=0 | DR <- Memory[AR]; PC <- PC + 1
   tick=000191 mPC=001 FETCH  pc=0000003C ar=0000003C dr=FF000000 acc=00000001 z=0 n=0 | AR <- PC; MPC <- DECODER[DR.opcode]
   tick=000192 mPC=052 HLT    pc=0000003C ar=0000003C dr=FF000000 acc=00000001 z=0 n=0 | HALT
