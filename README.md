@@ -39,7 +39,7 @@
 
 ## Язык программирования
 ### Синтаксис (BNF)
-```bnf
+```ebnf
 <program>       ::= { <statement> "\n" }
 <statement>     ::= <declaration>
                   | <assignment>
@@ -175,8 +175,10 @@ opcode       operand
 *\* Перед выполнением каждой инструкции происходит чтение команды за 2 такта.*
 
 > Instruction Fetch:
+> ```
 > 1: DR <- Memory[AR], PC <- PC + 1
 > 2: MPC <- DECODER[DR.opcode], AR <- PC
+> ```
 
 ### Микрокоманды
 Микрокод хранится отдельно от основной памяти в `microcode.py`. Одна запись `MicroInstruction` исполняется за один такт.
