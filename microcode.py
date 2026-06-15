@@ -1,3 +1,4 @@
+from typing import Any
 from dataclasses import dataclass
 from enum import IntEnum, unique
 
@@ -79,7 +80,7 @@ MROM_DESC = [""] * MROM_SIZE
 MROM_LABEL = [""] * MROM_SIZE
 
 
-def put(address: int, label: str, desc: str, **signals: object) -> None:
+def put(address: int, label: str, desc: str, **signals: Any) -> None:
     MROM[address] = MicroInstruction(**signals)
     MROM_DESC[address] = desc
     MROM_LABEL[address] = label

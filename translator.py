@@ -3,6 +3,7 @@ import ast
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 from isa import (
     CODE_BASE,
@@ -53,7 +54,7 @@ class Translator:
         self.types: dict[str, str] = {}
         self.arrays: dict[str, int] = {}
         self.pstr_capacity: dict[str, int] = {}
-        self.blocks: list[tuple] = []
+        self.blocks: list[tuple[str, int] | tuple[str, int, int]] = []
         self.ast: list[Statement] = []
         self.temp_index = 0
         self.free_expr_temps: list[int] = []
@@ -367,7 +368,7 @@ class Translator:
             self.blocks.append(("if", patch_site))
             return
         if statement.kind == "else":
-            kind, patch_site = self.blocks.pop()
+            kind, patch_site = cast(tuple[str, int], self.blocks.pop())
             if kind != "if":
                 raise SyntaxError(f"line {statement.line}: else after non-if block")
             end_jump = self.emit(Opcode.JMP, self.code_ref(0))
@@ -382,11 +383,11 @@ class Translator:
         if statement.kind == "end":
             block = self.blocks.pop()
             if block[0] == "while":
-                _, start, patch_site = block
+                _, start, patch_site = cast(tuple[str, int, int], block)
                 self.emit(Opcode.JMP, self.code_ref(start))
                 self.patch(patch_site, len(self.code))
             else:
-                self.patch(block[1], len(self.code))
+                self.patch(cast(tuple[str, int], block)[1], len(self.code))
             return
         raise AssertionError(f"unknown statement kind: {statement.kind}")
 
