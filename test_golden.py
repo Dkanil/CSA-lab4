@@ -3,6 +3,7 @@ import io
 import os
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import machine
 import pytest
@@ -10,7 +11,7 @@ import translator
 
 
 @pytest.mark.golden_test("golden/*.yml")
-def test_translator_and_machine(golden):
+def test_translator_and_machine(golden: Any) -> None:
     with tempfile.TemporaryDirectory() as tmpdirname:
         source = os.path.join(tmpdirname, "source.alg")
         input_stream = os.path.join(tmpdirname, "input.bin")
