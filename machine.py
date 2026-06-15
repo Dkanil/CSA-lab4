@@ -350,7 +350,7 @@ def output_as_text(values: list[int]) -> str:
     chars = []
     for value in values:
         signed = to_signed32(value)
-        if 32 <= signed <= 126:
+        if 32 <= signed <= 126 or signed in (9, 10, 13):
             chars.append(chr(signed))
         else:
             return ""

@@ -21,7 +21,13 @@ def test_translator_and_machine(golden: Any) -> None:
         trace = os.path.join(tmpdirname, "trace.log")
 
         Path(source).write_text(golden["in_source"], encoding="utf-8")
-        Path(input_stream).write_bytes(bytes(golden["in_stdin"]))
+        in_data = golden.get("in_stdin", [])
+        if isinstance(in_data, str):
+            input_bytes = bytes([len(in_data)]) + in_data.encode("ascii")
+        else:
+            input_bytes = bytes(in_data)
+
+        Path(input_stream).write_bytes(input_bytes)
 
         with contextlib.redirect_stdout(io.StringIO()) as stdout:
             translator.main(source, target)
