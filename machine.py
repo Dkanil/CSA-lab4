@@ -7,8 +7,28 @@ from typing import Callable
 
 from enum import IntEnum, unique
 
-from isa import CODE_BASE, IN_PORT, OUT_PORT, WORD_MASK, decode_arg, decode_opcode, decode_operand, to_signed32
-from microcode import DECODER, MROM, MROM_DESC, MROM_LABEL, AluControl, CondCode, SelAluL, SelAluR, SelAr, SelPc
+from isa import (
+    CODE_BASE,
+    IN_PORT,
+    OUT_PORT,
+    WORD_MASK,
+    decode_arg,
+    decode_opcode,
+    decode_operand,
+    to_signed32,
+)
+from microcode import (
+    DECODER,
+    MROM,
+    MROM_DESC,
+    MROM_LABEL,
+    AluControl,
+    CondCode,
+    SelAluL,
+    SelAluR,
+    SelAr,
+    SelPc,
+)
 
 SIGN_BIT = 0x80000000
 
@@ -186,7 +206,9 @@ class ControlUnit:
             return SelMpc.ADDR if not n else SelMpc.NEXT
         raise MachineError(f"unknown condition code: {cond_code}")
 
-    def _mux_mpc(self, sel_mpc: SelMpc, next_addr: int, decode_word: int, mpc: int) -> int:
+    def _mux_mpc(
+        self, sel_mpc: SelMpc, next_addr: int, decode_word: int, mpc: int
+    ) -> int:
         if sel_mpc == SelMpc.NEXT:
             return mpc + 1
         if sel_mpc == SelMpc.ADDR:
@@ -260,7 +282,9 @@ def load_program(path: str | Path) -> tuple[int, list[int]]:
     memory_size = words[1]
     memory = words[2:]
     if len(memory) < memory_size:
-        raise MachineError(f"memory image is truncated: expected {memory_size} words, got {len(memory)}")
+        raise MachineError(
+            f"memory image is truncated: expected {memory_size} words, got {len(memory)}"
+        )
     return entry, memory[:memory_size]
 
 
@@ -280,7 +304,12 @@ def format_trace_line(cu: ControlUnit, executed_mpc: int) -> str:
         f"acc={dp.acc & WORD_MASK:08X} z={int(dp.z)} n={int(dp.n)} | {desc}"
     )
 
-def run_until_stop(cu: ControlUnit, limit: int = 100000, on_step: Callable[[ControlUnit, int], None] | None = None) -> ControlUnit:
+
+def run_until_stop(
+    cu: ControlUnit,
+    limit: int = 100000,
+    on_step: Callable[[ControlUnit, int], None] | None = None,
+) -> ControlUnit:
     while not cu.halted and cu.tick < limit:
         try:
             executed_mpc = cu.step()
@@ -294,6 +323,7 @@ def run_until_stop(cu: ControlUnit, limit: int = 100000, on_step: Callable[[Cont
     if not cu.halted:
         cu.stop_reason = f"tick limit exceeded ({limit})"
     return cu
+
 
 def simulate(
     program_path: str | Path,
@@ -335,10 +365,14 @@ def main(
 ) -> None:
     if program is None:
         parser = argparse.ArgumentParser(description="Run microcoded processor model")
-        parser.add_argument("program", help="binary memory image produced by translator.py")
+        parser.add_argument(
+            "program", help="binary memory image produced by translator.py"
+        )
         parser.add_argument("input", nargs="?", help="optional input stream file")
         parser.add_argument("--trace", help="optional trace output file")
-        parser.add_argument("--limit", type=int, default=100000, help="maximum tick count")
+        parser.add_argument(
+            "--limit", type=int, default=100000, help="maximum tick count"
+        )
         args = parser.parse_args()
         program = args.program
         input_file = args.input

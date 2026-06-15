@@ -171,7 +171,9 @@ def to_bytes(instructions: list[Instruction], data: list[int]) -> bytes:
     return b"".join(struct.pack(">I", word & WORD_MASK) for word in words)
 
 
-def write_binary(path: str | Path, instructions: list[Instruction], data: list[int]) -> None:
+def write_binary(
+    path: str | Path, instructions: list[Instruction], data: list[int]
+) -> None:
     Path(path).write_bytes(to_bytes(instructions, data))
 
 
@@ -180,7 +182,9 @@ def to_listing(instructions: list[Instruction], data: list[int]) -> str:
     lines = [f"# entry {CODE_BASE}", "# code"]
     for offset, instruction in enumerate(instructions):
         address = CODE_BASE + offset
-        lines.append(f"{address:04} - {instruction.encode():08X} - {mnemonic(instruction)}")
+        lines.append(
+            f"{address:04} - {instruction.encode():08X} - {mnemonic(instruction)}"
+        )
 
     lines.append("# data")
     for offset, value in enumerate(data):

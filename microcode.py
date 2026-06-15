@@ -87,128 +87,330 @@ def put(address: int, label: str, desc: str, **signals: object) -> None:
 
 # Instruction fetch
 put(0, "FETCH", "DR <- Memory[AR]; PC <- PC + 1", mem_r=True, dr_l=True, pc_l=True)
-put(1, "FETCH", "AR <- PC; MPC <- DECODER[DR.opcode]", ar_l=True, sel_ar=SelAr.PC, cond_code=CondCode.DECODE)
+put(
+    1,
+    "FETCH",
+    "AR <- PC; MPC <- DECODER[DR.opcode]",
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    cond_code=CondCode.DECODE,
+)
 
 # LD: ACC <- Mem[arg]
 put(2, "LD", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(3, "LD", "DR <- Memory[AR]", mem_r=True, dr_l=True)
-put(4, "LD", "ACC <- DR; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_r=SelAluR.DR, alu_control=AluControl.PASS_RIGHT,
-    cond_code=CondCode.ALWAYS, jmp_addr=0, )
+put(
+    4,
+    "LD",
+    "ACC <- DR; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_r=SelAluR.DR,
+    alu_control=AluControl.PASS_RIGHT,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 # LDI: ACC <- arg
-put(5, "LDI", "ACC <- DR.arg; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_r=SelAluR.ARG, alu_control=AluControl.PASS_RIGHT,
-    cond_code=CondCode.ALWAYS, jmp_addr=0, )
+put(
+    5,
+    "LDI",
+    "ACC <- DR.arg; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_r=SelAluR.ARG,
+    alu_control=AluControl.PASS_RIGHT,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 # LD_IND: ACC <- Mem[Mem[arg]]
 put(6, "LD_IND", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(7, "LD_IND", "DR <- Memory[AR]", mem_r=True, dr_l=True)
 put(8, "LD_IND", "AR <- DR", ar_l=True, sel_ar=SelAr.DR)
 put(9, "LD_IND", "DR <- Memory[AR]", mem_r=True, dr_l=True)
-put(10, "LD_IND", "ACC <- DR; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_r=SelAluR.DR, alu_control=AluControl.PASS_RIGHT,
-    cond_code=CondCode.ALWAYS, jmp_addr=0, )
+put(
+    10,
+    "LD_IND",
+    "ACC <- DR; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_r=SelAluR.DR,
+    alu_control=AluControl.PASS_RIGHT,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 # ST: Mem[arg] <- ACC
 put(11, "ST", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
-put(12,
+put(
+    12,
     "ST",
     "Memory[AR] <- ACC; AR <- PC; -> FETCH",
-    mem_wr=True, ar_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, alu_control=AluControl.PASS_LEFT,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+    mem_wr=True,
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    alu_control=AluControl.PASS_LEFT,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 # ST_IND: Mem[Mem[arg]] <- ACC
 put(13, "ST_IND", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(14, "ST_IND", "DR <- Memory[AR]", mem_r=True, dr_l=True)
 put(15, "ST_IND", "AR <- DR", ar_l=True, sel_ar=SelAr.DR)
-put(16, "ST_IND", "Memory[AR] <- ACC; AR <- PC; -> FETCH",
-    mem_wr=True, ar_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, alu_control=AluControl.PASS_LEFT,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    16,
+    "ST_IND",
+    "Memory[AR] <- ACC; AR <- PC; -> FETCH",
+    mem_wr=True,
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    alu_control=AluControl.PASS_LEFT,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 # Memory arithmetic
 put(17, "ADD", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(18, "ADD", "DR <- Memory[AR]", mem_r=True, dr_l=True)
-put(19, "ADD", "ACC <- ACC + DR; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.DR, alu_control=AluControl.ADD,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    19,
+    "ADD",
+    "ACC <- ACC + DR; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.DR,
+    alu_control=AluControl.ADD,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 put(20, "SUB", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(21, "SUB", "DR <- Memory[AR]", mem_r=True, dr_l=True)
-put(22, "SUB", "ACC <- ACC - DR; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.DR, alu_control=AluControl.SUB,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    22,
+    "SUB",
+    "ACC <- ACC - DR; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.DR,
+    alu_control=AluControl.SUB,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 put(23, "MUL", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(24, "MUL", "DR <- Memory[AR]", mem_r=True, dr_l=True)
-put(25, "MUL", "ACC <- ACC * DR; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.DR, alu_control=AluControl.MUL,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    25,
+    "MUL",
+    "ACC <- ACC * DR; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.DR,
+    alu_control=AluControl.MUL,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 put(26, "DIV", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(27, "DIV", "DR <- Memory[AR]", mem_r=True, dr_l=True)
-put(28, "DIV", "ACC <- ACC // DR; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.DR, alu_control=AluControl.DIV,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    28,
+    "DIV",
+    "ACC <- ACC // DR; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.DR,
+    alu_control=AluControl.DIV,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 put(29, "MOD", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(30, "MOD", "DR <- Memory[AR]", mem_r=True, dr_l=True)
-put(31, "MOD", "ACC <- ACC % DR; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.DR, alu_control=AluControl.MOD,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    31,
+    "MOD",
+    "ACC <- ACC % DR; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.DR,
+    alu_control=AluControl.MOD,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 put(32, "CMP", "AR <- DR.arg", ar_l=True, sel_ar=SelAr.ARG)
 put(33, "CMP", "DR <- Memory[AR]", mem_r=True, dr_l=True)
-put(34, "CMP", "flags <- ACC - DR; AR <- PC; -> FETCH",
-    ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.DR, alu_control=AluControl.SUB,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    34,
+    "CMP",
+    "flags <- ACC - DR; AR <- PC; -> FETCH",
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.DR,
+    alu_control=AluControl.SUB,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 # Immediate arithmetic
-put(35, "ADDI", "ACC <- ACC + DR.arg; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.ARG, alu_control=AluControl.ADD,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
-put(36, "SUBI", "ACC <- ACC - DR.arg; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.ARG, alu_control=AluControl.SUB,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
-put(37, "CMPI", "flags <- ACC - DR.arg; AR <- PC; -> FETCH",
-    ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, sel_alu_r=SelAluR.ARG, alu_control=AluControl.SUB,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
-put(38, "NEG", "ACC <- -ACC; flags <- ACC; AR <- PC; -> FETCH",
-    acc_l=True, ar_l=True, flags_l=True, sel_ar=SelAr.PC,
-    sel_alu_l=SelAluL.ACC, alu_control=AluControl.NEG,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    35,
+    "ADDI",
+    "ACC <- ACC + DR.arg; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.ARG,
+    alu_control=AluControl.ADD,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
+put(
+    36,
+    "SUBI",
+    "ACC <- ACC - DR.arg; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.ARG,
+    alu_control=AluControl.SUB,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
+put(
+    37,
+    "CMPI",
+    "flags <- ACC - DR.arg; AR <- PC; -> FETCH",
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    sel_alu_r=SelAluR.ARG,
+    alu_control=AluControl.SUB,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
+put(
+    38,
+    "NEG",
+    "ACC <- -ACC; flags <- ACC; AR <- PC; -> FETCH",
+    acc_l=True,
+    ar_l=True,
+    flags_l=True,
+    sel_ar=SelAr.PC,
+    sel_alu_l=SelAluL.ACC,
+    alu_control=AluControl.NEG,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 # Control flow
-put(39, "JMP", "PC <- DR.arg; AR <- DR.arg; -> FETCH",
-    pc_l=True, sel_pc=SelPc.ALU, ar_l=True, sel_ar=SelAr.ARG,
-    sel_alu_r=SelAluR.ARG, alu_control=AluControl.PASS_RIGHT,
-    cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    39,
+    "JMP",
+    "PC <- DR.arg; AR <- DR.arg; -> FETCH",
+    pc_l=True,
+    sel_pc=SelPc.ALU,
+    ar_l=True,
+    sel_ar=SelAr.ARG,
+    sel_alu_r=SelAluR.ARG,
+    alu_control=AluControl.PASS_RIGHT,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 put(40, "BEQ", "if last cmp == 0 -> JMP", cond_code=CondCode.EQ, jmp_addr=39)
-put(41, "BEQ", "AR <- PC; -> FETCH", ar_l=True, sel_ar=SelAr.PC, cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    41,
+    "BEQ",
+    "AR <- PC; -> FETCH",
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 put(42, "BNE", "if last cmp != 0 -> JMP", cond_code=CondCode.NE, jmp_addr=39)
-put(43, "BNE", "AR <- PC; -> FETCH", ar_l=True, sel_ar=SelAr.PC, cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    43,
+    "BNE",
+    "AR <- PC; -> FETCH",
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 put(44, "BLT", "if last cmp < 0 -> JMP", cond_code=CondCode.LT, jmp_addr=39)
-put(45, "BLT", "AR <- PC; -> FETCH", ar_l=True, sel_ar=SelAr.PC, cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    45,
+    "BLT",
+    "AR <- PC; -> FETCH",
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 put(46, "BGT", "if last cmp > 0 -> JMP", cond_code=CondCode.GT, jmp_addr=39)
-put(47, "BGT", "AR <- PC; -> FETCH", ar_l=True, sel_ar=SelAr.PC, cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    47,
+    "BGT",
+    "AR <- PC; -> FETCH",
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 put(48, "BLE", "if last cmp <= 0 -> JMP", cond_code=CondCode.LE, jmp_addr=39)
-put(49, "BLE", "AR <- PC; -> FETCH", ar_l=True, sel_ar=SelAr.PC, cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    49,
+    "BLE",
+    "AR <- PC; -> FETCH",
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 put(50, "BGE", "if last cmp >= 0 -> JMP", cond_code=CondCode.GE, jmp_addr=39)
-put(51, "BGE", "AR <- PC; -> FETCH", ar_l=True, sel_ar=SelAr.PC, cond_code=CondCode.ALWAYS, jmp_addr=0)
+put(
+    51,
+    "BGE",
+    "AR <- PC; -> FETCH",
+    ar_l=True,
+    sel_ar=SelAr.PC,
+    cond_code=CondCode.ALWAYS,
+    jmp_addr=0,
+)
 
 put(52, "HLT", "HALT", halted=True)
 

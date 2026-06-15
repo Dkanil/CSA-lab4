@@ -1,10 +1,18 @@
-﻿import argparse
+import argparse
 import ast
 import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from isa import CODE_BASE, IN_PORT, OUT_PORT, Instruction, Opcode, to_listing, write_binary
+from isa import (
+    CODE_BASE,
+    IN_PORT,
+    OUT_PORT,
+    Instruction,
+    Opcode,
+    to_listing,
+    write_binary,
+)
 
 IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
 INTEGER_RE = re.compile(r"\d+\Z")
@@ -91,7 +99,9 @@ class Translator:
 
             parts = line.split()
             if len(parts) != 3 or parts[1] not in {"num", "char", "pstr"}:
-                raise SyntaxError(f"line {line_no}: expected 'var <num|char|pstr> <id>' or 'var num <id>[<size>]'")
+                raise SyntaxError(
+                    f"line {line_no}: expected 'var <num|char|pstr> <id>' or 'var num <id>[<size>]'"
+                )
             self.declare_var(parts[2], parts[1])
             return Statement("var", line_no, name=parts[2], type_name=parts[1])
 
@@ -127,7 +137,11 @@ class Translator:
 
         if line.startswith("print(") and line.endswith(")"):
             expr = line[6:-1].strip()
-            if not (expr in self.types and self.types[expr] == "pstr" and expr not in self.arrays):
+            if not (
+                expr in self.types
+                and self.types[expr] == "pstr"
+                and expr not in self.arrays
+            ):
                 self.validate_expr(expr, line_no)
             return Statement("print", line_no, expr=expr)
 
@@ -189,11 +203,15 @@ class Translator:
 
     def require_type(self, name: str, allowed: set[str], line_no: int) -> None:
         if name in self.arrays or self.types.get(name) not in allowed:
-            raise SyntaxError(f"line {line_no}: unexpected or undeclared identifier '{name}'")
+            raise SyntaxError(
+                f"line {line_no}: unexpected or undeclared identifier '{name}'"
+            )
 
     def require_lvalue_name(self, name: str, allowed: set[str], line_no: int) -> None:
         if self.types.get(name) not in allowed:
-            raise SyntaxError(f"line {line_no}: unexpected or undeclared identifier '{name}'")
+            raise SyntaxError(
+                f"line {line_no}: unexpected or undeclared identifier '{name}'"
+            )
 
     def parse_expr(self, expr: str, line_no: int, what: str = "expression") -> ast.AST:
         try:
@@ -239,10 +257,16 @@ class Translator:
 
     def validate_expr_node(self, node: ast.AST, source: str, line_no: int) -> None:
         # <integer>
-        if isinstance(node, ast.Constant) and isinstance(node.value, int) and not isinstance(node.value, bool):
+        if (
+            isinstance(node, ast.Constant)
+            and isinstance(node.value, int)
+            and not isinstance(node.value, bool)
+        ):
             segment = ast.get_source_segment(source, node)
             if segment is None or not INTEGER_RE.fullmatch(segment):
-                raise SyntaxError(f"line {line_no}: integer literal must contain only digits")
+                raise SyntaxError(
+                    f"line {line_no}: integer literal must contain only digits"
+                )
             return
         # <id>
         if isinstance(node, ast.Name):
@@ -258,11 +282,15 @@ class Translator:
             self.validate_expr_node(node.operand, source, line_no)
             return
         # <expr>
-        if isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.FloorDiv, ast.Mod)):
+        if isinstance(node, ast.BinOp) and isinstance(
+            node.op, (ast.Add, ast.Sub, ast.Mult, ast.FloorDiv, ast.Mod)
+        ):
             self.validate_expr_node(node.left, source, line_no)
             self.validate_expr_node(node.right, source, line_no)
             return
-        raise SyntaxError(f"line {line_no}: unsupported expression node {ast.dump(node)}")
+        raise SyntaxError(
+            f"line {line_no}: unsupported expression node {ast.dump(node)}"
+        )
 
     def validate_condition(self, condition: str, line_no: int) -> None:
         match = COND_RE.fullmatch(condition)
@@ -552,7 +580,11 @@ class Translator:
 
     @staticmethod
     def immediate_int(node: ast.AST) -> int | None:
-        if isinstance(node, ast.Constant) and isinstance(node.value, int) and not isinstance(node.value, bool):
+        if (
+            isinstance(node, ast.Constant)
+            and isinstance(node.value, int)
+            and not isinstance(node.value, bool)
+        ):
             value = int(node.value)
             if -(1 << 23) <= value < (1 << 23):
                 return value
@@ -568,19 +600,32 @@ class Translator:
                     attrs.append(f"{field}={value!r}")
             lines.append(f"{statement.kind}(" + ", ".join(attrs) + ")")
             if "[" in statement.name:
-                self.collect_expr_ast(ast.parse(statement.name, mode="eval").body, "  target: ", "  ", lines)
+                self.collect_expr_ast(
+                    ast.parse(statement.name, mode="eval").body,
+                    "  target: ",
+                    "  ",
+                    lines,
+                )
             if statement.expr:
-                self.collect_expr_ast(ast.parse(statement.expr, mode="eval").body, "  expr: ", "  ", lines)
+                self.collect_expr_ast(
+                    ast.parse(statement.expr, mode="eval").body, "  expr: ", "  ", lines
+                )
             if statement.condition:
                 match = COND_RE.fullmatch(statement.condition)
                 if match:
                     left, op, right = (part.strip() for part in match.groups())
                     lines.append(f"  condition_op: {op!r}")
-                    self.collect_expr_ast(ast.parse(left, mode="eval").body, "  left: ", "  ", lines)
-                    self.collect_expr_ast(ast.parse(right, mode="eval").body, "  right: ", "  ", lines)
+                    self.collect_expr_ast(
+                        ast.parse(left, mode="eval").body, "  left: ", "  ", lines
+                    )
+                    self.collect_expr_ast(
+                        ast.parse(right, mode="eval").body, "  right: ", "  ", lines
+                    )
         return "\n".join(lines)
 
-    def collect_expr_ast(self, node: ast.AST, prefix: str, child_prefix: str, lines: list[str]) -> None:
+    def collect_expr_ast(
+        self, node: ast.AST, prefix: str, child_prefix: str, lines: list[str]
+    ) -> None:
         if isinstance(node, ast.Constant):
             lines.append(f"{prefix}Literal(value={node.value!r})")
             return
@@ -590,11 +635,15 @@ class Translator:
         if isinstance(node, ast.Subscript):
             name = node.value.id if isinstance(node.value, ast.Name) else "?"
             lines.append(f"{prefix}IndexAccess(name={name!r})")
-            self.collect_expr_ast(node.slice, f"{child_prefix}index: ", f"{child_prefix}  ", lines)
+            self.collect_expr_ast(
+                node.slice, f"{child_prefix}index: ", f"{child_prefix}  ", lines
+            )
             return
         if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
             lines.append(f"{prefix}UnaryExpr(op='-')")
-            self.collect_expr_ast(node.operand, f"{child_prefix}operand: ", f"{child_prefix}  ", lines)
+            self.collect_expr_ast(
+                node.operand, f"{child_prefix}operand: ", f"{child_prefix}  ", lines
+            )
             return
         if isinstance(node, ast.BinOp):
             op = {
@@ -605,8 +654,12 @@ class Translator:
                 ast.Mod: "%",
             }[type(node.op)]
             lines.append(f"{prefix}BinaryExpr(op={op!r})")
-            self.collect_expr_ast(node.left, f"{child_prefix}left: ", f"{child_prefix}  ", lines)
-            self.collect_expr_ast(node.right, f"{child_prefix}right: ", f"{child_prefix}  ", lines)
+            self.collect_expr_ast(
+                node.left, f"{child_prefix}left: ", f"{child_prefix}  ", lines
+            )
+            self.collect_expr_ast(
+                node.right, f"{child_prefix}right: ", f"{child_prefix}  ", lines
+            )
             return
         raise AssertionError(f"Unexpected ast node: {node}")
 
@@ -624,7 +677,9 @@ def display_path(path: Path) -> str:
 
 def main(source: str | None = None, target: str | None = None) -> None:
     if source is None or target is None:
-        parser = argparse.ArgumentParser(description="Translate source code to binary machine code")
+        parser = argparse.ArgumentParser(
+            description="Translate source code to binary machine code"
+        )
         parser.add_argument("source", help="source file")
         parser.add_argument("target", help="target binary file")
         args = parser.parse_args()
@@ -642,7 +697,9 @@ def main(source: str | None = None, target: str | None = None) -> None:
     ast_path = target_path.with_suffix(target_path.suffix + ".ast")
     listing_path.write_text(to_listing(code, data), encoding="utf-8")
     ast_path.write_text(ast_dump, encoding="utf-8")
-    print(f"Строк в исходном коде: {len(source_path.read_text(encoding='utf-8').splitlines())}")
+    print(
+        f"Строк в исходном коде: {len(source_path.read_text(encoding='utf-8').splitlines())}"
+    )
     print(f"Строк в машинном коде: {len(code)}")
     print(f"Машинных слов памяти необходимого для выполнения программы: {len(data)}")
     print("\nЧудо скомпилировалось в следующие файлы:")
