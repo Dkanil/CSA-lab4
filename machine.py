@@ -1,5 +1,4 @@
 import argparse
-import re
 import struct
 from collections import deque
 from dataclasses import dataclass
@@ -265,22 +264,10 @@ def load_program(path: str | Path) -> tuple[int, list[int]]:
     return entry, memory[:memory_size]
 
 
-def parse_input_text(text: str) -> list[int]:
-    text = text.rstrip("\n")
-    if not text:
-        return []
-
-    int_stream = re.fullmatch(r"\s*[-+]?\d+(?:[\s,]+[-+]?\d+)*\s*", text)
-    if int_stream:
-        return [int(item) for item in re.findall(r"[-+]?\d+", text)]
-
-    return [len(text), *(ord(char) for char in text)]
-
-
 def load_input(path: str | Path | None) -> list[int]:
     if path is None:
         return []
-    return parse_input_text(Path(path).read_text(encoding="utf-8"))
+    return list(Path(path).read_bytes())
 
 
 def format_trace_line(cu: ControlUnit, executed_mpc: int) -> str:
@@ -344,7 +331,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run microcoded processor model")
     parser.add_argument("program", help="binary memory image produced by translator.py")
     parser.add_argument("input", nargs="?", help="optional input stream file")
-    parser.add_argument("trace", nargs="?", help="optional trace output file")
+    parser.add_argument("--trace", help="optional trace output file")
     parser.add_argument("--limit", type=int, default=100000, help="maximum tick count")
     args = parser.parse_args()
 
