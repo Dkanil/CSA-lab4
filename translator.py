@@ -616,7 +616,7 @@ def translate(source: str) -> tuple[list[Instruction], list[int], str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Translate lab4 source code to binary machine code")
+    parser = argparse.ArgumentParser(description="Translate source code to binary machine code")
     parser.add_argument("source", help="source file")
     parser.add_argument("target", help="target binary file")
     args = parser.parse_args()
